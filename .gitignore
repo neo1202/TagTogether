@@ -1,0 +1,64 @@
+# 通用設定
+.DS_Store
+Thumbs.db
+*.log
+*.pyc
+__pycache__/
+.env
+.env.*# 忽略環境變數文件
+.env
+
+
+# Node.js (React + TailwindCSS)
+node_modules/
+build/
+dist/
+*.lock
+
+# Python (FastAPI)
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.env
+.venv/
+env/
+venv/
+
+# FastAPI 運行中生成的文件
+instance/
+*.sqlite3
+
+# Docker
+*.swp
+.dockerignore
+docker-compose.override.yml
+logs/
+tmp/
+*.pid
+
+# Postgres
+*.pgsql
+*.db
+
+# VSCode / IDE 特定文件
+.vscode/
+.idea/
+*.iml
+
+# 操作系統生成的文件
+.DS_Store
+*.bak
+*.swp
+*.swo
+
+# 測試相關
+coverage/
+*.coverage
+pytest_cache/
+htmlcov/
+
+# 本地生成的臨時文件
+*.log
+*.tmp
