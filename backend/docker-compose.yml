@@ -1,15 +1,21 @@
 services:
   app:
     build:
-      context: ./app
+      context: .
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"  # 將容器的 8000 映射到主機的 8000
-    volumes:  # 使用bind mount
-      - ./app:/app  # 將宿主機的 app 目錄掛載到容器內的 /app
-      - ./db:/db  # 暫時加入，可刪
+      - "8000:8000" # 將容器的 8000 映射到主機的 8000
+    volumes: # 使用bind mount
+      - ./app:/backend/app # 將宿主機的 app 目錄掛載到容器內的 /app
+      - ./db:/backend/db # 暫時加入，可刪
     restart: always
-    env_file:
-      - .env
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    # environment:
+    #   - PYTHONPATH=/app         # 設置容器內 Python 模組搜索路徑
+    # env_file:
+    #   - .env
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload # workdir已經已經被指出是在app底下了
 
+# 為了讓他能hot reload 到bind mount裡的東西
+# 監控的file不能太多，所以需要workdir一個根目錄資料夾（backend)
+# 然後把app放在底下，這樣一樣能統一使用 python絕對路徑的import 例如：from app.api import auth, user
+# 不然如果照常見的workdir = /app, 就沒辦法統一有個app.在前面了會找不到
