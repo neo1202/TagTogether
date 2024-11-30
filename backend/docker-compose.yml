@@ -1,0 +1,15 @@
+services:
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"  # 將容器的 8000 映射到主機的 8000
+    volumes:  # 使用bind mount
+      - ./app:/app  # 將宿主機的 app 目錄掛載到容器內的 /app
+      - ./db:/db  # 暫時加入，可刪
+    restart: always
+    env_file:
+      - .env
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
