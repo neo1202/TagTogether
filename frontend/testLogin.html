@@ -1,3 +1,4 @@
+<!-- (可搭配 python3 -m http.server 5500做測試才能夠過CORS) -->
 <!DOCTYPE html>
 <html>
   <head>
@@ -35,25 +36,37 @@
           alert("Login failed: " + data.detail);
         }
       }
-
       async function getMyUsername() {
         if (!token) {
-          alert("You need to login first!");
-          return;
+            alert("You need to login first!");
+            return;
         }
 
-        const response = await fetch("http://127.0.0.1:8000/users/me", {
-          method: "GET",
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        try {
+            const response = await fetch("http://127.0.0.1:8000/users/me", {
+                method: "GET",
+                headers: { 
+                  "Authorization": `Bearer ${token}`, // 確保格式為 Bearer <token>
+                  "Content-Type": "application/json" 
+                },
+            });
 
-        const data = await response.json();
-        if (response.ok) {
-          alert("Your username: " + data.username);
-        } else {
-          alert("Failed to fetch username: " + data.detail);
+            if (!response.ok) {
+                // 錯誤處理：打印詳細錯誤信息
+                const errorData = await response.json();
+                console.error("Error response:", errorData);
+                alert("Failed to fetch username: " + JSON.stringify(errorData));
+                return;
+            }
+
+            const data = await response.json();
+            alert("Your username: " + data.username);
+        } catch (error) {
+            console.error("Fetch error:", error);
+            alert("An error occurred: " + error.message);
         }
-      }
+    }
+
     </script>
   </body>
 </html>

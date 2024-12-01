@@ -1,29 +1,45 @@
-# 處理加密、JWT 生成與驗證的工具
-from passlib.context import CryptContext
-from jose import jwt, JWTError
 from datetime import datetime, timedelta
+import jwt
+from jose import JWTError
+from fastapi import HTTPException, Security
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-SECRET_KEY = "your_secret_key"
+# 配置
+SECRET_KEY = "your_secret_key"  # 之後、替换为强大的密钥并通过环境变量存储
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
-
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
-
-def create_access_token(data: dict, expires_delta: timedelta = None):
+# 创建访问令牌
+def create_access_token(data: dict) -> str:
+    """
+    创建一个带有过期时间的 JWT 令牌
+    :param data: 包含用户信息的字典，例如 {"sub": "username"}
+    :return: 加密后的 JWT 字符串
+    """
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})  # 添加到期时间
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
 
-def decode_token(token: str):
+
+# 定義 HTTPBearer 的依賴，能夠自動解析Authorization中的header有沒有token
+auth_scheme = HTTPBearer()
+def verify_access_token(credentials: HTTPAuthorizationCredentials = Security(auth_scheme)) -> dict:
+    """
+    验证 JWT 令牌的有效性并解码
+    :param credentials: 自动从 Authorization header 提取的 JWT 令牌
+    :return: 解码后的 payload
+    """
+    token = credentials.credentials
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=401, detail="Invalid token: no subject")
         return payload
-    except JWTError:
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
+
