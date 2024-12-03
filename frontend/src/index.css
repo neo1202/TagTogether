@@ -25,6 +25,7 @@ body {
   background-position: center;
   display: flex;
   flex-direction: column; /* 避免內容被壓縮成一行 */
+  @apply text-black;
 }
 
 #root {
