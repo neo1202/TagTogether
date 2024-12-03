@@ -6,13 +6,13 @@ function App() {
   const [jwtToken, setJwtToken] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [alertClassName, setAlertClassName] = useState("hidden");
-  const location = useLocation(); // 获取当前路径
+  const location = useLocation(); // 用於追踪當前路徑變化
 
-  // 用以在切換頁面路徑時清除上個頁面留下來的alert訊息
+  // 每次路徑變化時清除警告訊息
   useEffect(() => {
     setAlertMessage("");
     setAlertClassName("hidden");
-  }, [location.pathname]); // 每当路径变化时触发
+  }, [location.pathname]);
 
   const navigate = useNavigate();
 
@@ -25,19 +25,36 @@ function App() {
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-100">
-      <header className="flex justify-between items-center p-4 bg-blue-600 text-white">
-        <h1 className="text-xl">JWT Login Test</h1>
-        <nav>
-          {jwtToken ? (
-            <button className="text-red-400" onClick={logOut}>
-              Logout
-            </button>
-          ) : (
-            <Link to="/login">Login</Link>
+      {/* Navigation Bar */}
+      <header className="flex items-center justify-between px-6 py-4 bg-blue-600 text-white">
+        <h1 className="text-xl font-bold">Event Platform</h1>
+        <nav className="flex space-x-4">
+          <Link to="/" className="hover:underline">
+            Home
+          </Link>
+          <Link to="/leaderboard" className="hover:underline">
+            Leaderboard
+          </Link>
+          {jwtToken && (
+            <>
+              <Link to="/sign-up-group" className="hover:underline">
+                Sign Up Group
+              </Link>
+              <Link to="/upload-post" className="hover:underline">
+                Upload Post
+              </Link>
+            </>
           )}
+          <button onClick={logOut} className="hover:underline text-red-400">
+            {jwtToken ? "Logout" : <Link to="/login">Login</Link>}
+          </button>
         </nav>
       </header>
+
+      {/* Alert Component */}
       <Alert message={alertMessage} className={alertClassName} />
+
+      {/* Main Content */}
       <main className="flex-1 p-4">
         <Outlet
           context={{
