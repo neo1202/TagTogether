@@ -1,8 +1,13 @@
+# 為了讓他能hot reload 到bind mount裡的東西
+# 監控的file不能太多，所以需要workdir一個根目錄資料夾（backend)
+# 然後把app放在底下，這樣一樣能統一使用 python絕對路徑的import 例如：from app.api import auth, user
+# 不然如果照常見的workdir = /app, 就沒辦法統一有個app.在前面了會找不到
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
+    image: backend-app:latest
     ports:
       - "8000:8000" # 將容器的 8000 映射到主機的 8000
     volumes: # 使用bind mount
@@ -13,9 +18,21 @@ services:
     #   - PYTHONPATH=/app         # 設置容器內 Python 模組搜索路徑
     # env_file:
     #   - .env
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload # workdir已經已經被指出是在app底下了
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload  # workdir已經已經被指出是在app底下了
 
-# 為了讓他能hot reload 到bind mount裡的東西
-# 監控的file不能太多，所以需要workdir一個根目錄資料夾（backend)
-# 然後把app放在底下，這樣一樣能統一使用 python絕對路徑的import 例如：from app.api import auth, user
-# 不然如果照常見的workdir = /app, 就沒辦法統一有個app.在前面了會找不到
+  postgres:
+    image: postgres:15
+    container_name: postgres_container
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/postgres-init:/docker-entrypoint-initdb.d
+  #     - postgres-data:/var/lib/postgresql/data
+  # volumes:
+  # postgres-data:
+    restart: always
+# 要改seed data的話 要docker-compose down -v 才能把默認的資料清除 然後重新build
