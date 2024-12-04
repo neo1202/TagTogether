@@ -8,7 +8,7 @@ from pydantic import BaseModel, EmailStr
 
 # 用於用戶登入請求
 class UserLogin(BaseModel):
-    username: str
+    user_name: str
     password: str
 
 # 用於生成 JWT 的響應模式
@@ -18,14 +18,14 @@ class Token(BaseModel):
 
 # 用於用戶註冊請求
 class UserRegister(BaseModel):
-    username: str
+    user_name: str
     email: EmailStr  # 驗證是否為合法郵箱
     password: str
 
 # 用於返回給前端的用戶信息
 class UserResponse(BaseModel):
     id: int
-    username: str
+    user_name: str
     email: EmailStr
     created_at: str
 

@@ -34,8 +34,8 @@ def verify_access_token(credentials: HTTPAuthorizationCredentials = Security(aut
     token = credentials.credentials
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
+        user_name: str = payload.get("sub")
+        if user_name is None:
             raise HTTPException(status_code=401, detail="Invalid token: no subject")
         return payload
     except jwt.ExpiredSignatureError:

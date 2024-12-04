@@ -8,14 +8,14 @@ router = APIRouter()
 
 @router.post("/login", response_model=Token)  # 定义返回给客户端的数据模型是 Token
 def login(user: UserLogin, db: Session = Depends(get_db)):  # 注入数据库会话
-    db_user = get_user(db, user.username)  # 使用 get_user 函数从数据库中获取用户
-    print(f"/login, received username: {user.username}, pwd: {user.password}")
+    db_user = get_user(db, user.user_name)  # 使用 get_user 函数从数据库中获取用户
+    print(f"/login, received username: {user.user_name}, pwd: {user.password}")
     
     # 验证用户是否存在以及密码是否匹配
     if not db_user or db_user.password != user.password:  # 直接比较明文密码
         raise HTTPException(status_code=401, detail="Invalid credentials")
     # 创建访问令牌
-    access_token = create_access_token({"sub": db_user.username})
+    access_token = create_access_token({"sub": db_user.user_name})
     # 返回生成的 JWT 令牌
     return {"access_token": access_token, "token_type": "bearer"}
 # API 调用: 客户端发起 POST 请求到 /login，携带用户名和密码。
