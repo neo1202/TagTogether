@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 
 # 创建基础类
@@ -9,10 +9,10 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String, unique=True, index=True)
-    password = Column(String)  # 存储明文密码
-    email = Column(String, unique=True, index=True)
+    password = Column(String)  # 存储明文密码（建议后续加密）
+    is_old_customer = Column(Boolean, default=False)
 
-    def __init__(self, username: str, password: str, email: str = None):
+    def __init__(self, username: str, password: str, is_old_customer: bool = False):
         self.username = username
         self.password = password
-        self.email = email
+        self.is_old_customer = is_old_customer
