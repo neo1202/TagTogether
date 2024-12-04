@@ -7,7 +7,7 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import ErrorPage from "./pages/status/Error";
 import Leaderboard from "./pages/Leaderboard";
-import SignUpGroup from "./pages/SignUpGroup";
+import SignUpTeam from "./pages/SignUpTeam";
 import UploadPost from "./pages/UploadPost";
 const router = createBrowserRouter([
   {
@@ -25,8 +25,8 @@ const router = createBrowserRouter([
         element: <Leaderboard />,
       },
       {
-        path: "/sign-up-group",
-        element: <SignUpGroup />,
+        path: "/sign-up-team",
+        element: <SignUpTeam />,
       },
       {
         path: "/upload-post",
