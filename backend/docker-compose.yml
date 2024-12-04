@@ -18,7 +18,7 @@ services:
     #   - PYTHONPATH=/app         # 設置容器內 Python 模組搜索路徑
     # env_file:
     #   - .env
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload  # workdir已經已經被指出是在app底下了
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload # workdir已經已經被指出是在app底下了
 
   postgres:
     image: postgres:15
@@ -34,5 +34,5 @@ services:
   #     - postgres-data:/var/lib/postgresql/data
   # volumes:
   # postgres-data:
-    restart: always
+  # restart: always
 # 要改seed data的話 要docker-compose down -v 才能把默認的資料清除 然後重新build

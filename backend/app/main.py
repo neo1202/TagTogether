@@ -1,6 +1,6 @@
 from typing import Union
 from fastapi import FastAPI
-from app.api import auth, user  # 確保從 app 根開始，已經從docker compose設定絕對路徑起點
+from app.api import auth, user, team  # 確保從 app 根開始，已經從docker compose設定絕對路徑起點
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -15,7 +15,8 @@ app.add_middleware(
 
 # 加載路由
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
-app.include_router(user.router, prefix="/users", tags=["Users"])
+app.include_router(user.router, prefix="/user", tags=["User"])
+app.include_router(team.router, prefix="/team", tags=["Team"])
 
 
 
