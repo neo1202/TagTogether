@@ -6,13 +6,14 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const { setJwtToken, setAlertClassName, setAlertMessage } = useOutletContext();
+  const { setJwtToken, setAlertClassName, setAlertMessage } =
+    useOutletContext();
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const payload = { username, password };
+      const payload = { user_name: username, password };
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -26,18 +27,24 @@ const Login = () => {
         setAlertMessage("");
         navigate("/");
       } else {
-        setAlertClassName("bg-red-500 text-white p-4 rounded border border-red-700");
+        setAlertClassName(
+          "bg-red-500 text-white p-4 rounded border border-red-700"
+        );
         setAlertMessage(data.detail || "Login failed.");
       }
     } catch (error) {
-      setAlertClassName("bg-red-500 text-white p-4 rounded border border-red-700");
-      setAlertMessage("An error occurred during login.");
+      setAlertClassName(
+        "bg-red-500 text-white p-4 rounded border border-red-700"
+      );
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred";
+      setAlertMessage(`${errorMessage} occurred during login.`);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Login</h2>
+    <div className="max-w-md p-4 mx-auto bg-white rounded shadow">
+      <h2 className="mb-4 text-xl font-bold">Login</h2>
       <form onSubmit={handleSubmit}>
         <Input
           title="Username"
@@ -53,7 +60,10 @@ const Login = () => {
           className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:border-blue-500 focus:ring focus:ring-blue-200"
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded mt-4">
+        <button
+          type="submit"
+          className="w-full p-2 mt-4 text-white bg-blue-600 rounded"
+        >
           Login
         </button>
       </form>
