@@ -97,3 +97,11 @@ button:focus-visible {
   background-color: #f8d7da;
   border-color: #f5c6cb;
 }
+input {
+  all: unset;
+  background-color: white;
+  color: black;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
