@@ -4,7 +4,7 @@ from app.models.user_model import User
 from app.models.team_model import Team, TeamMember
 
 # 数据库连接字符串，替换为你的 PostgreSQL 配置
-DATABASE_URL = "postgresql://myuser:mypassword@postgres_container:5432/mydb"
+DATABASE_URL = "postgresql://myuser:mypassword@postgres:5432/mydb"
 
 # 创建数据库引擎
 engine = create_engine(DATABASE_URL, echo=True)
