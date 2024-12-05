@@ -29,4 +29,7 @@ class UserResponse(BaseModel):
     email: EmailStr
     created_at: str
 
+class UploadPost(BaseModel):
+    content: str
+
 

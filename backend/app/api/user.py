@@ -1,6 +1,11 @@
-# 存放與用戶相關的路由，如獲取當前用戶資訊
-from fastapi import APIRouter, Depends
+# 存放與用戶相關的路由，如獲取當前用戶資訊，上傳貼文
+from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.orm import Session
+from app.database import get_db
+from app.models.user_model import Checkin
 from app.core.security import verify_access_token
+from app.schemas.user_schemas import UploadPost
+from app.repositories.user_repository import UserRepository
 
 router = APIRouter()
 
@@ -17,3 +22,29 @@ def get_my_user_name(payload: dict = Depends(verify_access_token)):
 #     "sub": "testuser",  # 用戶名
 #     "exp": 1700000000   # 過期時間戳
 # }
+
+@router.post("/upload-post")
+def upload_post(content: UploadPost, db: Session = Depends(get_db), payload: dict = Depends(verify_access_token)):
+    try:
+        user_name = payload["sub"]
+        user_id = UserRepository.get_user_id_by_username(db, user_name)
+        print(f"upload_post!!!get user id {user_id}")
+        if not user_id:
+            raise HTTPException(status_code=404, detail="User not found.")
+        # 創建新的 checkin 寫入資料庫
+        new_checkin = Checkin(
+            content=content.content,
+            user_id=user_id,
+            user_name=user_name,
+        )
+        db.add(new_checkin)
+        db.commit()
+        db.refresh(new_checkin)
+        # 更新這使用者的最後一次上傳時間
+        UserRepository.update_last_checkin_time(db, user_id)
+        # db.refresh() 会确保从数据库获取最新的字段值，进一步同步对象与数据库的状态, 所以可以知道checkin id
+        return {"message": "Post uploaded successfully", "checkin_id": new_checkin.id}
+    except Exception as e:
+        db.rollback()
+        print(e)
+        raise HTTPException(status_code=500, detail="Failed to upload post.")
