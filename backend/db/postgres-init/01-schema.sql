@@ -4,6 +4,7 @@ CREATE TABLE "users" (
   "password" VARCHAR,
   "weight" FLOAT DEFAULT 1,
   "is_old_customer" BOOLEAN DEFAULT FALSE,
+  "last_update" TIMESTAMP DEFAULT '2024-12-02',
   "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -24,12 +25,10 @@ CREATE TABLE "team_members" (
 
 CREATE TABLE "checkins" (
   "id" SERIAL PRIMARY KEY,
-  "team_id" INTEGER,
   "user_id" INTEGER,
-  "team_name" VARCHAR,
   "user_name" VARCHAR,
-  "timestamp" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  "post_url" VARCHAR
+  "content" VARCHAR,
+  "timestamp" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE "scores" (
@@ -42,6 +41,5 @@ CREATE TABLE "scores" (
 
 ALTER TABLE "team_members" ADD FOREIGN KEY ("team_id") REFERENCES "teams" ("id");
 ALTER TABLE "team_members" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
-ALTER TABLE "checkins" ADD FOREIGN KEY ("team_id") REFERENCES "teams" ("id");
 ALTER TABLE "checkins" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 ALTER TABLE "scores" ADD FOREIGN KEY ("team_id") REFERENCES "teams" ("id");
