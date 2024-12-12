@@ -28,10 +28,10 @@ def upload_post(content: UploadPost, db: Session = Depends(get_db), payload: dic
     try:
         user_name = payload["sub"]
         user_id = UserRepository.get_user_id_by_username(db, user_name)
-        print(f"upload_post!!!get user id {user_id}")
         if not user_id:
             raise HTTPException(status_code=404, detail="User not found.")
-        # 創建新的 checkin 寫入資料庫
+
+        # 創建新的 Check-in 寫入資料庫
         new_checkin = Checkin(
             content=content.content,
             user_id=user_id,
@@ -42,7 +42,8 @@ def upload_post(content: UploadPost, db: Session = Depends(get_db), payload: dic
         db.refresh(new_checkin)
         # 更新這使用者的最後一次上傳時間
         UserRepository.update_last_checkin_time(db, user_id)
-        # db.refresh() 会确保从数据库获取最新的字段值，进一步同步对象与数据库的状态, 所以可以知道checkin id
+        # 更新該用戶所在團隊的分數
+        TeamRepository.update_team_scores(db, user_id)
         return {"message": "Post uploaded successfully", "checkin_id": new_checkin.id}
     except Exception as e:
         db.rollback()

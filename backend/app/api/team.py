@@ -4,7 +4,7 @@ from app.database import get_db
 from app.repositories.team_repository import TeamRepository
 from app.schemas.team_schemas import CreateTeam, JoinTeam
 from app.models.user_model import User
-from app.models.team_model import Team, TeamMember
+from app.models.team_model import Team, TeamMember, Score
 from app.core.security import verify_access_token
 
 router = APIRouter()
@@ -42,6 +42,8 @@ def join_team(request: JoinTeam, db: Session = Depends(get_db), payload: dict = 
         raise HTTPException(status_code=400, detail="User already in this team.")
     # 添加成员并更新权重
     TeamRepository.add_team_member(db, team.team_name, user_name)
+    # 加入成員時更新 所有有關的 team的權重
+    TeamRepository.update_team_scores(db, user.id)
     return {"message": f"Successfully joined the team '{team.team_name}'."}
 
 # 获取团队成员列表
@@ -52,3 +54,25 @@ def get_team_members(team_id: int, db: Session = Depends(get_db)):
         return members
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch team members: {str(e)}")
+
+@router.get("/leaderboard/")
+def get_leaderboard(db: Session = Depends(get_db)):
+    scores = (
+        db.query(Score.team_name, Score.score)
+        .order_by(Score.score.desc())
+        .limit(20)
+        .all()
+    )
+    return [{"team_name": team_name, "score": score} for team_name, score in scores]
+
+
+# [
+#   {
+#     "team_name": "Team Alpha",
+#     "score": 95.2
+#   },
+#   {
+#     "team_name": "Team Beta",
+#     "score": 88.1
+#   },
+# ]
