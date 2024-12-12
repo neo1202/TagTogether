@@ -43,3 +43,12 @@ def join_team(request: JoinTeam, db: Session = Depends(get_db), payload: dict = 
     # 添加成员并更新权重
     TeamRepository.add_team_member(db, team.team_name, user_name)
     return {"message": f"Successfully joined the team '{team.team_name}'."}
+
+# 获取团队成员列表
+@router.get("/team-members/{team_id}")
+def get_team_members(team_id: int, db: Session = Depends(get_db)):
+    try:
+        members = TeamRepository.get_team_members(db, team_id)
+        return members
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch team members: {str(e)}")

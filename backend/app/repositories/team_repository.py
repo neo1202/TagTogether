@@ -37,3 +37,8 @@ class TeamRepository:
         # 更新用户权重
         UserRepository.update_user_weight(db, user.id)
         return team_member
+    @staticmethod
+    def get_team_members(db: Session, team_id: int):
+        # 获取团队成员
+        team_members = db.query(TeamMember).filter(TeamMember.team_id == team_id).all()
+        return [{"user_id": member.user_id, "user_name": member.user_name} for member in team_members]

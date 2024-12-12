@@ -3,6 +3,8 @@ import { useApi } from "../hooks/useApi";
 
 const TeamsPage = () => {
   const [teams, setTeams] = useState([]); // 存储团队列表
+  const [expandedTeamIds, setExpandedTeamIds] = useState([]); // 保存展开的团队 ID 列表
+  const [teamMembers, setTeamMembers] = useState({}); // 存储团队成员列表
   const [isModalOpen, setIsModalOpen] = useState(false); // 控制模态视窗显示
   const [newTeamName, setNewTeamName] = useState(""); // 新团队名称
   const [alertClassName, setAlertClassName] = useState("hidden"); // 状态消息样式
@@ -32,6 +34,36 @@ const TeamsPage = () => {
       setAlertMessage("An error occurred while fetching teams.");
     }
   }, [fetchWithToken]);
+
+  // 从后端获取团队成员
+  const fetchTeamMembers = async (teamId) => {
+    try {
+      const response = await fetchWithToken(`/api/team/team-members/${teamId}`);
+      const data = await response.json();
+      if (response.ok) {
+        setTeamMembers((prevMembers) => ({
+          ...prevMembers,
+          [teamId]: data,
+        }));
+      } else {
+        console.error("Failed to fetch team members.");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // 切换团队展开状态
+  const toggleTeamExpansion = (teamId) => {
+    if (expandedTeamIds.includes(teamId)) {
+      setExpandedTeamIds(expandedTeamIds.filter((id) => id !== teamId)); // 收起团队
+    } else {
+      setExpandedTeamIds([...expandedTeamIds, teamId]); // 展开团队
+      if (!teamMembers[teamId]) {
+        fetchTeamMembers(teamId); // 如果没有加载过成员，加载成员
+      }
+    }
+  };
 
   // 创建新团队
   const handleCreateTeam = async () => {
@@ -68,7 +100,7 @@ const TeamsPage = () => {
   };
 
   // 加入团队
-  const handleJoinTeam = async (teamName) => {
+  const handleJoinTeam = async (teamName, teamId) => {
     try {
       const response = await fetchWithToken("/api/team/join-team/", {
         method: "POST",
@@ -76,7 +108,7 @@ const TeamsPage = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          team_name: teamName, // 只发送团队名称
+          team_name: teamName,
         }),
       });
       if (response.ok) {
@@ -84,11 +116,8 @@ const TeamsPage = () => {
           "bg-green-500 text-white p-4 rounded border border-green-700"
         );
         setAlertMessage("Successfully joined the team!");
-        setTimeout(async () => {
-          setAlertClassName("hidden");
-          setAlertMessage("");
-          await fetchTeams(); // 延迟刷新团队列表
-        }, 3000);
+        // fetchTeams();
+        fetchTeamMembers(teamId);
       } else {
         const data = await response.json();
         setAlertClassName(
@@ -126,22 +155,36 @@ const TeamsPage = () => {
 
       <div className="space-y-4">
         {teams.map((team) => (
-          <div
-            key={team.id}
-            className="flex items-center justify-between p-4 border rounded shadow"
-          >
-            <span>{team.name}</span>
-            <button
-              onClick={() => handleJoinTeam(team.name)}
-              className="px-4 py-2 text-white bg-green-500 rounded"
+          <div key={team.id} className="p-4 border rounded shadow">
+            <div
+              className="flex items-center justify-between"
+              onClick={() => toggleTeamExpansion(team.id)}
             >
-              Join
-            </button>
+              <span>{team.name}</span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation(); // 阻止事件冒泡
+                  handleJoinTeam(team.name, team.id);
+                }}
+                className="px-4 py-2 text-white bg-green-500 rounded"
+              >
+                Join
+              </button>
+            </div>
+            {expandedTeamIds.includes(team.id) && teamMembers[team.id] && (
+              <div className="p-2 mt-4 bg-gray-100 rounded">
+                <h3 className="font-bold">Members:</h3>
+                <ul className="list-disc list-inside">
+                  {teamMembers[team.id].map((member) => (
+                    <li key={member.user_id}>{member.user_name}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         ))}
       </div>
 
-      {/* Modal for creating a new team */}
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="p-6 bg-white rounded shadow-lg w-80">
