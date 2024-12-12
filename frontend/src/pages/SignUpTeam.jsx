@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useApi } from "../hooks/useApi";
 
 const TeamsPage = () => {
   const [teams, setTeams] = useState([]); // 存储团队列表
@@ -7,16 +7,12 @@ const TeamsPage = () => {
   const [newTeamName, setNewTeamName] = useState(""); // 新团队名称
   const [alertClassName, setAlertClassName] = useState("hidden"); // 状态消息样式
   const [alertMessage, setAlertMessage] = useState(""); // 状态消息内容
-  const { jwtToken } = useOutletContext(); // 从 context 获取 JWT token
+  const { fetchWithToken } = useApi();
 
   // 从后端获取团队列表
   const fetchTeams = useCallback(async () => {
     try {
-      const response = await fetch("/api/team/all-teams/", {
-        headers: {
-          Authorization: `Bearer ${jwtToken}`,
-        },
-      });
+      const response = await fetchWithToken("/api/team/all-teams/");
       const data = await response.json();
       if (response.ok) {
         setTeams(data);
@@ -35,16 +31,15 @@ const TeamsPage = () => {
       );
       setAlertMessage("An error occurred while fetching teams.");
     }
-  }, [jwtToken]);
+  }, [fetchWithToken]);
 
   // 创建新团队
   const handleCreateTeam = async () => {
     try {
-      const response = await fetch("/api/team/create-team/", {
+      const response = await fetchWithToken("/api/team/create-team/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${jwtToken}`,
         },
         body: JSON.stringify({ team_name: newTeamName }),
       });
@@ -75,11 +70,10 @@ const TeamsPage = () => {
   // 加入团队
   const handleJoinTeam = async (teamName) => {
     try {
-      const response = await fetch("/api/team/join-team/", {
+      const response = await fetchWithToken("/api/team/join-team/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${jwtToken}`,
         },
         body: JSON.stringify({
           team_name: teamName, // 只发送团队名称
@@ -90,7 +84,11 @@ const TeamsPage = () => {
           "bg-green-500 text-white p-4 rounded border border-green-700"
         );
         setAlertMessage("Successfully joined the team!");
-        fetchTeams(); // 刷新列表以反映加入状态
+        setTimeout(async () => {
+          setAlertClassName("hidden");
+          setAlertMessage("");
+          await fetchTeams(); // 延迟刷新团队列表
+        }, 3000);
       } else {
         const data = await response.json();
         setAlertClassName(

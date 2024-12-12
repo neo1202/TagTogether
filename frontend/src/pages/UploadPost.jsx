@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useApi } from "../hooks/useApi"; // 导入 useApi hook
 
 const UploadPost = () => {
   const [content, setContent] = useState(""); // 存储贴文内容
   const [alertClassName, setAlertClassName] = useState("hidden"); // 状态消息样式
   const [alertMessage, setAlertMessage] = useState(""); // 状态消息内容
-  const { jwtToken } = useOutletContext(); // 从 context 获取 JWT token
+  const { fetchWithToken } = useApi(); // 使用 fetchWithToken 替代原生 fetch
 
   // 提交贴文
   const handleSubmit = async (event) => {
@@ -13,11 +13,10 @@ const UploadPost = () => {
 
     try {
       const payload = { content }; // 发送到后端的数据
-      const response = await fetch("/api/user/upload-post", {
+      const response = await fetchWithToken("/api/user/upload-post", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${jwtToken}`,
         },
         body: JSON.stringify(payload),
       });
