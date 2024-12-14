@@ -24,7 +24,7 @@ const LeaderboardPage = () => {
   }, [fetchLeaderboard]);
 
   return (
-    <div className="max-w-4xl p-6 mx-auto mt-12 text-gray-100 bg-gray-900 rounded-lg shadow-lg">
+    <div className="max-w-4xl p-6 mx-auto mt-2 text-gray-100 bg-gray-900 rounded-lg shadow-lg">
       <h1 className="mb-6 text-3xl font-bold text-center text-purple-400">
         Leaderboard
       </h1>

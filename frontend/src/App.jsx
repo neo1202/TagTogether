@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
-// import Alert from "./pages/status/Alert";
 
 function App() {
   const [jwtToken, setJwtToken] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [alertClassName, setAlertClassName] = useState("hidden");
-  const location = useLocation(); // 用于追踪当前路径变化
+  const location = useLocation();
 
   // 每次路径变化时清除警告信息
   useEffect(() => {
@@ -28,18 +27,18 @@ function App() {
       {/* Navigation Bar */}
       <header className="flex items-center justify-between px-6 py-4 bg-gray-900 border-b shadow-lg border-gold-400">
         <h1 className="text-2xl font-bold text-gold-400">
-          {jwtToken ? "Welcome Back!" : "Event Platform"}
+          {jwtToken ? "Welcome Back!" : "Tag Together"}
         </h1>
-        <nav className="flex space-x-6 text-gray-300">
+        <nav className="flex items-center space-x-6 text-gray-300">
           <Link
             to="/"
-            className="font-semibold transition duration-200 hover:text-gold-400"
+            className="py-2 font-semibold transition duration-200 hover:text-gold-400"
           >
             Home
           </Link>
           <Link
             to="/leaderboard"
-            className="font-semibold transition duration-200 hover:text-gold-400"
+            className="py-2 font-semibold transition duration-200 hover:text-gold-400"
           >
             Leaderboard
           </Link>
@@ -47,13 +46,13 @@ function App() {
             <>
               <Link
                 to="/sign-up-team"
-                className="font-semibold transition duration-200 hover:text-gold-400"
+                className="py-2 font-semibold transition duration-200 hover:text-gold-400"
               >
                 Sign Up Team
               </Link>
               <Link
                 to="/upload-post"
-                className="font-semibold transition duration-200 hover:text-gold-400"
+                className="py-2 font-semibold transition duration-200 hover:text-gold-400"
               >
                 Upload Post
               </Link>
@@ -61,7 +60,7 @@ function App() {
           )}
           <button
             onClick={logOut}
-            className="font-semibold transition duration-200 hover:text-red-500"
+            className="py-2 font-semibold transition duration-200 hover:text-red-500"
           >
             {jwtToken ? "Logout" : <Link to="/login">Login</Link>}
           </button>
@@ -91,7 +90,7 @@ function App() {
 
       {/* Footer */}
       <footer className="p-4 text-sm text-center text-gray-500 bg-gray-900 border-t border-gold-400">
-        © {new Date().getFullYear()} Event Platform. All rights reserved.
+        © {new Date().getFullYear()} Tag Together. All rights reserved.
       </footer>
     </div>
   );

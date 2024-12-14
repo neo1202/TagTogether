@@ -9,7 +9,6 @@ function Home() {
   const { setAlertMessage, setAlertClassName } = useOutletContext();
   const { fetchWithToken } = useApi();
 
-  // Alert 消息显示三秒后消失
   const showAlert = useCallback(
     (message, className) => {
       setAlertMessage(message);
@@ -22,7 +21,6 @@ function Home() {
     [setAlertMessage, setAlertClassName]
   );
 
-  // 获取帖子
   const fetchPosts = useCallback(async () => {
     try {
       const response = await fetchWithToken("/api/post/posts/");
@@ -30,16 +28,14 @@ function Home() {
         const data = await response.json();
         setPosts(data);
       } else {
-        console.error("Failed to fetch posts.");
         showAlert("Failed to fetch posts.", "alert-danger");
       }
     } catch (error) {
-      console.error("An error occurred while fetching posts:", error);
+      console.log(error);
       showAlert("An error occurred while fetching posts.", "alert-danger");
     }
   }, [fetchWithToken, showAlert]);
 
-  // 获取用户名
   useEffect(() => {
     const fetchUsername = async () => {
       try {
@@ -47,34 +43,32 @@ function Home() {
         if (response.ok) {
           const data = await response.json();
           setUsername(data.user_name);
-        } else {
-          console.error("Failed to fetch username.");
         }
       } catch (error) {
-        console.error("An error occurred while fetching username:", error);
+        console.error(error);
       }
     };
-
     fetchUsername();
   }, [fetchWithToken]);
 
-  // 获取帖子
   useEffect(() => {
     fetchPosts();
   }, [fetchPosts]);
 
   return (
     <div className="min-h-screen text-gray-200 bg-black">
-      {/* 横幅图片 */}
-      <div className="relative">
+      {/* 图片横幅区域 */}
+      <div className="relative group">
+        {/* 图片 */}
         <img
           src={coverImage}
           alt="Cover"
           className="object-cover w-full h-auto"
         />
-        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <h2 className="text-4xl font-extrabold text-gold-400">
-            Welcome, {username || "Guest"}!
+        {/* 遮罩和文字，仅在悬停时显示 */}
+        <div className="absolute inset-0 flex items-center justify-center transition-all duration-300 bg-black bg-opacity-0 group-hover:bg-opacity-50">
+          <h2 className="text-4xl font-extrabold transition-opacity duration-300 opacity-0 text-gold-400 group-hover:opacity-100">
+            Hello, {username || "Guest"}!
           </h2>
         </div>
       </div>
