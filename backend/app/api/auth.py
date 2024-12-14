@@ -1,8 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends
-from app.schemas.user_schemas import UserLogin, Token
+from app.schemas.user_schemas import UserLogin, Token, UserRegister
 from app.core.security import create_access_token
 from app.database import get_db, get_user
 from sqlalchemy.orm import Session
+from app.models.user_model import User
 
 router = APIRouter()
 
@@ -23,3 +24,21 @@ def login(user: UserLogin, db: Session = Depends(get_db)):  # 注入数据库会
 # get_user 查询用户: get_user(db, user.username) 使用会话查询用户表，返回匹配的用户或 None。
 # 验证逻辑: 检查用户是否存在以及密码是否匹配，验证失败则返回 401 错误。
 # 令牌生成: 如果验证通过，调用 create_access_token 生成 JWT 令牌，并返回给客户端。
+
+@router.post("/register")
+def signup(request: UserRegister, db: Session = Depends(get_db)):
+    # 檢查用戶是否已存在
+    existing_user = db.query(User).filter(User.user_name == request.user_name).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Username already exists.")
+
+    # 創建新用戶
+    new_user = User(
+        user_name=request.user_name,
+        password=request.password,  # 需加密存儲
+        is_old_customer=request.is_old_customer,
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return {"message": "User created successfully."}

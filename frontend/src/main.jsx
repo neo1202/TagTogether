@@ -9,6 +9,7 @@ import ErrorPage from "./pages/status/Error";
 import Leaderboard from "./pages/Leaderboard";
 import SignUpTeam from "./pages/SignUpTeam";
 import UploadPost from "./pages/UploadPost";
+import Register from "./pages/Register";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -16,6 +17,10 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: <Home /> },
+      {
+        path: "/register",
+        element: <Register />,
+      },
       {
         path: "/login",
         element: <Login />,
