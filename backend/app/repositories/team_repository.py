@@ -66,46 +66,54 @@ class TeamRepository:
     # 3. 團隊內新會員的人數 N
     @staticmethod
     def update_team_scores(db: Session, user_id: int):
-        # 找到用戶所在的所有團隊
-        team_memberships = db.query(TeamMember).filter(TeamMember.user_id == user_id).all()  # TeamMember表內 entry
+    # 找到用戶所在的所有團隊
+      team_memberships = db.query(TeamMember).filter(TeamMember.user_id == user_id).all()
 
-        for membership in team_memberships:
-            team_id = membership.team_id
-            team_name = membership.team_name
-            # 計算團隊總人數 T
-            T = db.query(TeamMember).filter(TeamMember.team_id == team_id).count()
-            # 計算團隊默契 S
-            checkins = db.query(Checkin).filter(Checkin.user_id == user_id).order_by(Checkin.timestamp).all()
-            if len(checkins) > 1:
-                first_checkin = checkins[0].timestamp
-                last_checkin = checkins[-1].timestamp
-                S = (last_checkin - first_checkin).total_seconds() / 3600
-            else:
-                S = 0  # 單一 Check-in 時默契為 0
+      for membership in team_memberships:
+          team_id = membership.team_id
+          team_name = membership.team_name
 
-            # 計算新會員數量 N
-            N = db.query(TeamMember).join(User, TeamMember.user_id == User.id).filter(
-                TeamMember.team_id == team_id,
-                User.is_old_customer == False  # 新会员的条件
-            ).count()
+          # 計算團隊總人數（考慮權重）
+          total_weight = db.query(func.sum(User.weight)).join(TeamMember, TeamMember.user_id == User.id).filter(
+              TeamMember.team_id == team_id
+          ).scalar() or 0.0
 
-            # 設定 α 和 β 的參數
-            alpha = 0.05
-            beta = 3
-            # 計算團隊分數
-            score = T / (alpha * (S + 1)) + beta * N
-            # 更新團隊分數表
-            existing_score = db.query(Score).filter(Score.team_id == team_id).first()
-            if existing_score:
-                existing_score.score = score
-                existing_score.updated_at = func.now()
-            else:
-                new_score = Score(
-                    team_id=team_id,
-                    team_name=team_name,
-                    score=score,
-                    updated_at=func.now()
-                )
-                db.add(new_score)
+          # 計算新會員數量（考慮權重）
+          new_members_weight = db.query(func.sum(User.weight)).join(TeamMember, TeamMember.user_id == User.id).filter(
+              TeamMember.team_id == team_id,
+              User.is_old_customer == False  # 新會員條件
+          ).scalar() or 0.0
 
-        db.commit()
+          # 計算團隊默契 S（同步程度）
+          checkins = db.query(Checkin).filter(Checkin.user_id == user_id).order_by(Checkin.timestamp).all()
+          if len(checkins) > 1:
+              first_checkin = checkins[0].timestamp
+              last_checkin = checkins[-1].timestamp
+              S = (last_checkin - first_checkin).total_seconds() / 3600
+          else:
+              S = 0  # 單一 Check-in 時默契為 0
+
+          # 設定 α 和 β 的參數
+          alpha = 0.05
+          beta = 3
+
+          # 計算團隊分數
+          print(f"\n\n\n\n\nscore of team {team_name} is from Total: {total_weight:.2f}, "
+                f"New: {new_members_weight:.2f}, Sync: {S:.2f}.\n\n\n\n\n")
+          score = total_weight / (alpha * (S + 1)) + beta * new_members_weight
+
+          # 更新團隊分數表
+          existing_score = db.query(Score).filter(Score.team_id == team_id).first()
+          if existing_score:
+              existing_score.score = score
+              existing_score.updated_at = func.now()
+          else:
+              new_score = Score(
+                  team_id=team_id,
+                  team_name=team_name,
+                  score=score,
+                  updated_at=func.now()
+              )
+              db.add(new_score)
+
+      db.commit()
