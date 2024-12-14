@@ -6,6 +6,8 @@ from app.models.user_model import Checkin
 from app.core.security import verify_access_token
 from app.schemas.user_schemas import UploadPost
 from app.repositories.user_repository import UserRepository
+from app.repositories.team_repository import TeamRepository
+
 
 router = APIRouter()
 
@@ -25,12 +27,13 @@ def get_my_user_name(payload: dict = Depends(verify_access_token)):
 
 @router.post("/upload-post")
 def upload_post(content: UploadPost, db: Session = Depends(get_db), payload: dict = Depends(verify_access_token)):
+    print("\n\n\n\n\nAHHHHHH upload post!!!\n\n\n\n\n")
     try:
         user_name = payload["sub"]
         user_id = UserRepository.get_user_id_by_username(db, user_name)
         if not user_id:
             raise HTTPException(status_code=404, detail="User not found.")
-
+        print(f"\n\nTry New Checkin with {user_id}, {user_name}\n\n")
         # 創建新的 Check-in 寫入資料庫
         new_checkin = Checkin(
             content=content.content,

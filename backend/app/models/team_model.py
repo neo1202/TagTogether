@@ -6,9 +6,11 @@ from sqlalchemy.orm import relationship
 class Team(Base):
     __tablename__ = "teams"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    team_name = Column(String, unique=True)
+    team_name = Column(String, unique=True, nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
-    scores = relationship("Score", back_populates="team", cascade="all, delete-orphan")
+
+    # 一对一关系：一个团队对应一个分数
+    score = relationship("Score", back_populates="team", uselist=False, cascade="all, delete-orphan")
 
 class TeamMember(Base):
     __tablename__ = "team_members"
@@ -24,9 +26,10 @@ class TeamMember(Base):
 class Score(Base):
     __tablename__ = "scores"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    team_id = Column(Integer, ForeignKey("teams.id"), nullable=False)  # 外键关联到 Team 表
+    team_id = Column(Integer, ForeignKey("teams.id"), unique=True, nullable=False)  # 添加 unique 限制
     team_name = Column(String, nullable=False)
-    score = Column(Float, nullable=False, default=0.0)  # 分数，默认为 0
-    updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())  # 自动更新时间
+    score = Column(Float, nullable=False, default=0.0)
+    updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    team = relationship("Team", back_populates="scores")  # 方便访问关联的 Team
+    # 一对一关系：分数关联到一个团队
+    team = relationship("Team", back_populates="score")

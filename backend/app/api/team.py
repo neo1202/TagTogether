@@ -58,7 +58,8 @@ def get_team_members(team_id: int, db: Session = Depends(get_db)):
 @router.get("/leaderboard/")
 def get_leaderboard(db: Session = Depends(get_db)):
     scores = (
-        db.query(Score.team_name, Score.score)
+        db.query(Team.team_name, Score.score)
+        .join(Score, Team.id == Score.team_id)
         .order_by(Score.score.desc())
         .limit(20)
         .all()

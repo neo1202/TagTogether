@@ -14,6 +14,7 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     team_members = relationship("TeamMember", back_populates="user")  # 通过 user.team_members，可以获取用户加入的所有团队
+    checkins = relationship("Checkin", back_populates="user")  # 添加與 Checkin 的反向關係
 
 class Checkin(Base):
     __tablename__ = "checkins"
@@ -22,3 +23,5 @@ class Checkin(Base):
     user_name = Column(String)
     content = Column(String)
     timestamp = Column(TIMESTAMP, server_default=func.now())
+    
+    user = relationship("User", back_populates="checkins")

@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
-from app.models.user_model import User
-from app.models.team_model import Team, TeamMember
+from sqlalchemy.sql import func
+from app.models.user_model import User, Checkin
+from app.models.team_model import Team, TeamMember, Score
 from app.repositories.user_repository import UserRepository
 
 # add： 添加对象到db Session。
@@ -56,6 +57,7 @@ class TeamRepository:
             team_id=team_id,
             team_name=team_name,
             score=0.0,  # 默认分数为 0
+            updated_at=func.now()
         )
         db.add(default_score)
 
@@ -77,7 +79,7 @@ class TeamRepository:
             if len(checkins) > 1:
                 first_checkin = checkins[0].timestamp
                 last_checkin = checkins[-1].timestamp
-                S = (last_checkin - first_checkin).total_seconds()
+                S = (last_checkin - first_checkin).total_seconds() / 3600
             else:
                 S = 0  # 單一 Check-in 時默契為 0
 
@@ -88,8 +90,8 @@ class TeamRepository:
             ).count()
 
             # 設定 α 和 β 的參數
-            alpha = 0.5
-            beta = 2
+            alpha = 0.05
+            beta = 3
             # 計算團隊分數
             score = T / (alpha * (S + 1)) + beta * N
             # 更新團隊分數表
