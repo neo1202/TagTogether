@@ -6,6 +6,7 @@ from app.schemas.team_schemas import CreateTeam, JoinTeam
 from app.models.user_model import User
 from app.models.team_model import Team, TeamMember, Score
 from app.core.security import verify_access_token
+from typing import List, Dict
 
 router = APIRouter()
 
@@ -58,22 +59,58 @@ def get_team_members(team_id: int, db: Session = Depends(get_db)):
 @router.get("/leaderboard/")
 def get_leaderboard(db: Session = Depends(get_db)):
     scores = (
-        db.query(Team.team_name, Score.score)
+        db.query(Team.id, Team.team_name, Score.score)
         .join(Score, Team.id == Score.team_id)
         .order_by(Score.score.desc())
         .limit(20)
         .all()
     )
-    return [{"team_name": team_name, "score": score} for team_name, score in scores]
+    return [
+        {"team_id": team_id, "team_name": team_name, "score": score}
+        for team_id, team_name, score in scores
+    ]
 
+@router.get("/score-info/{team_id}")
+def get_team_score_info(team_id: int, db: Session = Depends(get_db)) -> Dict:
+    # 获取团队数据
+    team = db.query(Team).filter(Team.id == team_id).first()
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found.")
 
-# [
-#   {
-#     "team_name": "Team Alpha",
-#     "score": 95.2
-#   },
-#   {
-#     "team_name": "Team Beta",
-#     "score": 88.1
-#   },
-# ]
+    # 获取团队成员
+    team_members = db.query(TeamMember).filter(TeamMember.team_id == team_id).all()
+    member_ids = [member.user_id for member in team_members]
+    
+    if not member_ids:
+        return {
+            "team_name": team.team_name,
+            "total_members": 0,
+            "new_members": 0,
+            "earliest_checkin": None,
+            "latest_checkin": None,
+        }
+
+    # 查询用户数据
+    users = db.query(User).filter(User.id.in_(member_ids)).all()
+
+    # 计算总人数（基于 weight）和新会员人数（基于 weight 和 is_old_customer）
+    total_members_weight = sum(user.weight for user in users)
+    new_members_weight = sum(user.weight for user in users if not user.is_old_customer)
+
+    # 查找最早和最晚打卡时间
+    earliest_user = min(users, key=lambda x: x.last_update)
+    latest_user = max(users, key=lambda x: x.last_update)
+
+    return {
+        "team_name": team.team_name,
+        "total_members": total_members_weight,
+        "new_members": new_members_weight,
+        "earliest_checkin": {
+            "name": earliest_user.user_name,
+            "time": earliest_user.last_update,
+        },
+        "latest_checkin": {
+            "name": latest_user.user_name,
+            "time": latest_user.last_update,
+        },
+    }
