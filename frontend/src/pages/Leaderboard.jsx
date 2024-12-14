@@ -6,7 +6,6 @@ const LeaderboardPage = () => {
   const { fetchWithToken } = useApi();
 
   const fetchLeaderboard = useCallback(async () => {
-    console.log("Fetching leaderboard...");
     try {
       const response = await fetchWithToken("/api/team/leaderboard/");
       const data = await response.json();
@@ -25,18 +24,20 @@ const LeaderboardPage = () => {
   }, [fetchLeaderboard]);
 
   return (
-    <div className="max-w-4xl p-4 mx-auto">
-      <h1 className="mb-4 text-2xl font-bold">Leaderboard</h1>
+    <div className="max-w-4xl p-6 mx-auto mt-12 text-gray-100 bg-gray-900 rounded-lg shadow-lg">
+      <h1 className="mb-6 text-3xl font-bold text-center text-purple-400">
+        Leaderboard
+      </h1>
       <div className="space-y-4">
         {leaderboard.map((team, index) => (
           <div
             key={team.team_name}
-            className="flex items-center justify-between p-4 border rounded shadow"
+            className="flex items-center justify-between p-4 bg-gray-800 border border-gray-700 rounded shadow"
           >
-            <span className="font-bold">
+            <span className="text-lg font-semibold text-gold-500">
               {index + 1}. {team.team_name}
             </span>
-            <span className="font-medium text-blue-600">
+            <span className="text-xl font-medium text-purple-400">
               {team.score.toFixed(2)}
             </span>
           </div>

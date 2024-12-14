@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
-import Alert from "./pages/status/Alert";
+// import Alert from "./pages/status/Alert";
 
 function App() {
   const [jwtToken, setJwtToken] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [alertClassName, setAlertClassName] = useState("hidden");
-  const location = useLocation(); // 用於追踪當前路徑變化
+  const location = useLocation(); // 用于追踪当前路径变化
 
-  // 每次路徑變化時清除警告訊息
+  // 每次路径变化时清除警告信息
   useEffect(() => {
     setAlertMessage("");
     setAlertClassName("hidden");
@@ -24,38 +24,61 @@ function App() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-100">
+    <div className="flex flex-col min-h-screen text-gray-200 bg-black">
       {/* Navigation Bar */}
-      <header className="flex items-center justify-between px-6 py-4 text-white bg-blue-600">
-        <h1 className="text-xl font-bold">Event Platform</h1>
-        <nav className="flex space-x-4">
-          <Link to="/" className="hover:underline">
+      <header className="flex items-center justify-between px-6 py-4 bg-gray-900 border-b shadow-lg border-gold-400">
+        <h1 className="text-2xl font-bold text-gold-400">
+          {jwtToken ? "Welcome Back!" : "Event Platform"}
+        </h1>
+        <nav className="flex space-x-6 text-gray-300">
+          <Link
+            to="/"
+            className="font-semibold transition duration-200 hover:text-gold-400"
+          >
             Home
           </Link>
-          <Link to="/leaderboard" className="hover:underline">
+          <Link
+            to="/leaderboard"
+            className="font-semibold transition duration-200 hover:text-gold-400"
+          >
             Leaderboard
           </Link>
           {jwtToken && (
             <>
-              <Link to="/sign-up-team" className="hover:underline">
+              <Link
+                to="/sign-up-team"
+                className="font-semibold transition duration-200 hover:text-gold-400"
+              >
                 Sign Up Team
               </Link>
-              <Link to="/upload-post" className="hover:underline">
+              <Link
+                to="/upload-post"
+                className="font-semibold transition duration-200 hover:text-gold-400"
+              >
                 Upload Post
               </Link>
             </>
           )}
-          <button onClick={logOut} className="text-red-400 hover:underline">
+          <button
+            onClick={logOut}
+            className="font-semibold transition duration-200 hover:text-red-500"
+          >
             {jwtToken ? "Logout" : <Link to="/login">Login</Link>}
           </button>
         </nav>
       </header>
 
       {/* Alert Component */}
-      <Alert message={alertMessage} className={alertClassName} />
+      {alertMessage && (
+        <div
+          className={`${alertClassName} mx-6 mt-4 px-4 py-3 border rounded shadow-lg bg-gray-800 text-gold-300`}
+        >
+          {alertMessage}
+        </div>
+      )}
 
       {/* Main Content */}
-      <main className="flex-1 p-4">
+      <main className="flex-1 p-6 bg-gray-800 rounded-t-lg shadow-inner">
         <Outlet
           context={{
             jwtToken,
@@ -65,6 +88,11 @@ function App() {
           }}
         />
       </main>
+
+      {/* Footer */}
+      <footer className="p-4 text-sm text-center text-gray-500 bg-gray-900 border-t border-gold-400">
+        © {new Date().getFullYear()} Event Platform. All rights reserved.
+      </footer>
     </div>
   );
 }

@@ -32,10 +32,6 @@ const router = createBrowserRouter([
         path: "/upload-post",
         element: <UploadPost />,
       },
-      // {
-      //   path: "/movies/:id",
-      //   element: <Movie />,
-      // },
     ],
   },
 ]);

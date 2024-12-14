@@ -2,16 +2,15 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useApi } from "../hooks/useApi";
 
 const TeamsPage = () => {
-  const [teams, setTeams] = useState([]); // 存储团队列表
-  const [expandedTeamIds, setExpandedTeamIds] = useState([]); // 保存展开的团队 ID 列表
-  const [teamMembers, setTeamMembers] = useState({}); // 存储团队成员列表
-  const [isModalOpen, setIsModalOpen] = useState(false); // 控制模态视窗显示
-  const [newTeamName, setNewTeamName] = useState(""); // 新团队名称
-  const [alertClassName, setAlertClassName] = useState("hidden"); // 状态消息样式
-  const [alertMessage, setAlertMessage] = useState(""); // 状态消息内容
+  const [teams, setTeams] = useState([]);
+  const [expandedTeamIds, setExpandedTeamIds] = useState([]);
+  const [teamMembers, setTeamMembers] = useState({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newTeamName, setNewTeamName] = useState("");
+  const [alertClassName, setAlertClassName] = useState("hidden");
+  const [alertMessage, setAlertMessage] = useState("");
   const { fetchWithToken } = useApi();
 
-  // 从后端获取团队列表
   const fetchTeams = useCallback(async () => {
     try {
       const response = await fetchWithToken("/api/team/all-teams/");
@@ -35,7 +34,6 @@ const TeamsPage = () => {
     }
   }, [fetchWithToken]);
 
-  // 从后端获取团队成员
   const fetchTeamMembers = async (teamId) => {
     try {
       const response = await fetchWithToken(`/api/team/team-members/${teamId}`);
@@ -53,19 +51,17 @@ const TeamsPage = () => {
     }
   };
 
-  // 切换团队展开状态
   const toggleTeamExpansion = (teamId) => {
     if (expandedTeamIds.includes(teamId)) {
-      setExpandedTeamIds(expandedTeamIds.filter((id) => id !== teamId)); // 收起团队
+      setExpandedTeamIds(expandedTeamIds.filter((id) => id !== teamId));
     } else {
-      setExpandedTeamIds([...expandedTeamIds, teamId]); // 展开团队
+      setExpandedTeamIds([...expandedTeamIds, teamId]);
       if (!teamMembers[teamId]) {
-        fetchTeamMembers(teamId); // 如果没有加载过成员，加载成员
+        fetchTeamMembers(teamId);
       }
     }
   };
 
-  // 创建新团队
   const handleCreateTeam = async () => {
     try {
       const response = await fetchWithToken("/api/team/create-team/", {
@@ -83,7 +79,7 @@ const TeamsPage = () => {
         setAlertMessage("Team created successfully!");
         setNewTeamName("");
         setIsModalOpen(false);
-        fetchTeams(); // 创建团队后刷新列表
+        fetchTeams();
       } else {
         setAlertClassName(
           "bg-red-500 text-white p-4 rounded border border-red-700"
@@ -135,48 +131,55 @@ const TeamsPage = () => {
   };
 
   useEffect(() => {
-    fetchTeams(); // 初始化加载团队
+    fetchTeams();
   }, [fetchTeams]);
 
   return (
-    <div className="max-w-4xl p-4 mx-auto">
-      <h1 className="mb-4 text-2xl font-bold">Teams</h1>
+    <div className="max-w-4xl p-6 mx-auto text-gray-200 bg-gray-900">
+      <h1 className="mb-6 text-3xl font-bold text-gold-400">Teams</h1>
 
       <button
         onClick={() => setIsModalOpen(true)}
-        className="px-4 py-2 mb-4 text-white bg-blue-500 rounded"
+        className="px-6 py-3 mb-6 font-semibold text-white transition bg-purple-600 rounded hover:bg-purple-700"
       >
         Create New Team
       </button>
 
       {alertMessage && (
-        <p className={`mb-4 ${alertClassName}`}>{alertMessage}</p>
+        <p className={`mb-6 ${alertClassName}`}>{alertMessage}</p>
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         {teams.map((team) => (
-          <div key={team.id} className="p-4 border rounded shadow">
+          <div key={team.id} className="p-6 bg-gray-800 rounded shadow-lg">
             <div
               className="flex items-center justify-between"
               onClick={() => toggleTeamExpansion(team.id)}
             >
-              <span>{team.name}</span>
+              <span className="text-lg font-semibold">{team.name}</span>
               <button
                 onClick={(e) => {
                   e.stopPropagation(); // 阻止事件冒泡
                   handleJoinTeam(team.name, team.id);
                 }}
-                className="px-4 py-2 text-white bg-green-500 rounded"
+                className="px-4 py-2 font-semibold text-white transition bg-green-500 rounded hover:bg-green-600"
               >
                 Join
               </button>
             </div>
             {expandedTeamIds.includes(team.id) && teamMembers[team.id] && (
-              <div className="p-2 mt-4 bg-gray-100 rounded">
-                <h3 className="font-bold">Members:</h3>
-                <ul className="list-disc list-inside">
+              <div className="p-4 mt-4 bg-gray-700 rounded">
+                <h3 className="mb-2 text-lg font-semibold text-gold-400">
+                  Members:
+                </h3>
+                <ul className="space-y-2">
                   {teamMembers[team.id].map((member) => (
-                    <li key={member.user_id}>{member.user_name}</li>
+                    <li
+                      key={member.user_id}
+                      className="px-3 py-2 text-gray-300 bg-gray-800 rounded"
+                    >
+                      {member.user_name}
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -187,25 +190,27 @@ const TeamsPage = () => {
 
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="p-6 bg-white rounded shadow-lg w-80">
-            <h2 className="mb-4 text-lg font-bold">Create a New Team</h2>
+          <div className="p-8 text-gray-200 bg-gray-800 rounded shadow-lg w-96">
+            <h2 className="mb-4 text-xl font-bold text-gold-400">
+              Create a New Team
+            </h2>
             <input
               type="text"
               value={newTeamName}
               onChange={(e) => setNewTeamName(e.target.value)}
               placeholder="Team Name"
-              className="w-full p-2 mb-4 border border-gray-300 rounded"
+              className="w-full p-3 mb-4 text-gray-300 bg-gray-900 border border-gray-700 rounded"
             />
-            <div className="flex justify-end space-x-2">
+            <div className="flex justify-end space-x-4">
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 text-gray-700 bg-gray-300 rounded"
+                className="px-4 py-2 font-semibold text-gray-400 transition bg-gray-700 rounded hover:bg-gray-600"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreateTeam}
-                className="px-4 py-2 text-white bg-blue-500 rounded"
+                className="px-4 py-2 font-semibold text-white transition bg-purple-600 rounded hover:bg-purple-700"
               >
                 Create
               </button>

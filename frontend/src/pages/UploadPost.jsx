@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useApi } from "../hooks/useApi"; // 导入 useApi hook
+import { useApi } from "../hooks/useApi";
 
 const UploadPost = () => {
   const [content, setContent] = useState(""); // 存储贴文内容
@@ -23,32 +23,32 @@ const UploadPost = () => {
 
       if (response.ok) {
         setAlertClassName(
-          "bg-green-500 text-white p-4 rounded border border-green-700"
+          "bg-green-600 text-white p-4 rounded border border-green-700"
         );
         setAlertMessage("Post uploaded successfully!");
         setContent(""); // 清空输入框
       } else {
         const data = await response.json();
         setAlertClassName(
-          "bg-red-500 text-white p-4 rounded border border-red-700"
+          "bg-red-600 text-white p-4 rounded border border-red-700"
         );
         setAlertMessage(data.detail || "Failed to upload post.");
       }
     } catch (error) {
       console.error("Error uploading post:", error);
       setAlertClassName(
-        "bg-red-500 text-white p-4 rounded border border-red-700"
+        "bg-red-600 text-white p-4 rounded border border-red-700"
       );
       setAlertMessage("An error occurred while uploading.");
     }
   };
 
   return (
-    <div className="max-w-md p-4 mx-auto bg-white rounded shadow">
-      <h2 className="mb-4 text-xl font-bold">Upload Post</h2>
+    <div className="max-w-lg p-6 mx-auto mt-12 text-gray-100 bg-gray-900 rounded shadow-lg">
+      <h2 className="mb-6 text-2xl font-bold text-purple-400">Upload Post</h2>
 
       {alertMessage && (
-        <p className={`mb-4 ${alertClassName}`}>{alertMessage}</p>
+        <p className={`mb-6 ${alertClassName}`}>{alertMessage}</p>
       )}
 
       <form onSubmit={handleSubmit}>
@@ -56,11 +56,11 @@ const UploadPost = () => {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="Write your post content here..."
-          className="w-full p-2 mb-4 bg-blue-100 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full h-40 p-4 text-gray-200 placeholder-gray-400 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-purple-600"
         />
         <button
           type="submit"
-          className="w-full px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
+          className="w-full py-3 mt-4 text-lg font-semibold text-white transition bg-purple-600 rounded hover:bg-purple-700"
         >
           Upload
         </button>

@@ -43,30 +43,38 @@ const Login = () => {
   };
 
   return (
-    <div className="max-w-md p-4 mx-auto bg-white rounded shadow">
-      <h2 className="mb-4 text-xl font-bold">Login</h2>
-      <form onSubmit={handleSubmit}>
-        <Input
-          title="Username"
-          type="text"
-          name="username"
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:border-blue-500 focus:ring focus:ring-blue-200"
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <Input
-          title="Password"
-          type="password"
-          name="password"
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:border-blue-500 focus:ring focus:ring-blue-200"
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button
-          type="submit"
-          className="w-full p-2 mt-4 text-white bg-blue-600 rounded"
-        >
+    <div className="flex items-center justify-center min-h-screen text-gray-200 bg-gray-900">
+      <div className="w-full max-w-md p-8 bg-gray-800 rounded shadow-lg">
+        <h2 className="mb-6 text-2xl font-bold text-center text-gold-400">
           Login
-        </button>
-      </form>
+        </h2>
+        <form onSubmit={handleSubmit} className="w-full">
+          <div className="mb-4">
+            <Input
+              title="Username"
+              type="text"
+              name="username"
+              className="w-full px-4 py-2 text-sm text-gray-200 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-600"
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </div>
+          <div className="mb-6">
+            <Input
+              title="Password"
+              type="password"
+              name="password"
+              className="w-full px-4 py-2 text-sm text-gray-200 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-600"
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full py-3 text-lg font-semibold text-white transition bg-purple-600 rounded hover:bg-purple-700"
+          >
+            Login
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
