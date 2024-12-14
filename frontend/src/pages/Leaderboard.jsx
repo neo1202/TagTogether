@@ -5,7 +5,6 @@ const LeaderboardPage = () => {
   const [leaderboard, setLeaderboard] = useState([]);
   const { fetchWithToken } = useApi();
 
-  // 使用 useCallback 包裹 fetchLeaderboard
   const fetchLeaderboard = useCallback(async () => {
     console.log("Fetching leaderboard...");
     try {
@@ -23,7 +22,7 @@ const LeaderboardPage = () => {
 
   useEffect(() => {
     fetchLeaderboard();
-  }, [fetchLeaderboard]); 
+  }, [fetchLeaderboard]);
 
   return (
     <div className="max-w-4xl p-4 mx-auto">
@@ -37,7 +36,9 @@ const LeaderboardPage = () => {
             <span className="font-bold">
               {index + 1}. {team.team_name}
             </span>
-            <span className="font-medium text-blue-600">{team.score.toFixed(2)}</span>
+            <span className="font-medium text-blue-600">
+              {team.score.toFixed(2)}
+            </span>
           </div>
         ))}
       </div>
