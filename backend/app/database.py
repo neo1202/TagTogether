@@ -2,9 +2,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from app.models.user_model import User
 from app.models.team_model import Team, TeamMember
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # 数据库连接字符串，替换为你的 PostgreSQL 配置
-DATABASE_URL = "postgresql://myuser:mypassword@postgres:5432/mydb"
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # 创建数据库引擎
 engine = create_engine(DATABASE_URL, echo=True)

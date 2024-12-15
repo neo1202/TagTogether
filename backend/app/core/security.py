@@ -3,9 +3,13 @@ import jwt
 from jose import JWTError
 from fastapi import HTTPException, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # 配置
-SECRET_KEY = "your_secret_key"  # 之後、替换为强大的密钥并通过环境变量存储
+SECRET_KEY = os.getenv("SECRET_KEY")  # 之後、替换为强大的密钥并通过环境变量存储
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

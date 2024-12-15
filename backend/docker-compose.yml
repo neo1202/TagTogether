@@ -14,19 +14,17 @@ services:
       - ./app:/backend/app # 將宿主機的 app 目錄掛載到容器內的 /app
       - ./db:/backend/db # 暫時加入，可刪
     restart: always
-    # environment:
-    #   - PYTHONPATH=/app         # 設置容器內 Python 模組搜索路徑
-    # env_file:
-    #   - .env
+    env_file:
+      - .env
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload # workdir已經已經被指出是在app底下了
 
   postgres:
     image: postgres:15
     # container_name: postgres_container
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydb
     ports:
       - "5432:5432"
     volumes:
