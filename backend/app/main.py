@@ -13,6 +13,11 @@ app.add_middleware(
     allow_headers=["*"],  # 允許的 HTTP 頭部
 )
 
+# Health check endpoint
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
+
 # 加載路由
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(post.router, prefix="/post", tags=["Post"])
