@@ -19,7 +19,7 @@ def health_check():
     return {"status": "healthy"}
 
 # 加載路由
-app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
-app.include_router(post.router, prefix="/post", tags=["Post"])
-app.include_router(user.router, prefix="/user", tags=["User"])
-app.include_router(team.router, prefix="/team", tags=["Team"])
+app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
+app.include_router(post.router, prefix="/api/post", tags=["Post"])
+app.include_router(user.router, prefix="/api/user", tags=["User"])
+app.include_router(team.router, prefix="/api/team", tags=["Team"])
