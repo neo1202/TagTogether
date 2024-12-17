@@ -7,7 +7,7 @@ import os
 
 load_dotenv()
 
-# 数据库连接字符串，替换为你的 PostgreSQL 配置
+# Ensure your DATABASE_URL is correctly set in your environment variables
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 # 创建数据库引擎
