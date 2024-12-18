@@ -66,7 +66,7 @@ class TeamRepository:
     # 3. 團隊內新會員的人數 N
     @staticmethod
     def update_team_scores(db: Session, user_id: int):
-    # 找到用戶所在的所有團隊
+      # 找到用戶所在的所有團隊
       team_memberships = db.query(TeamMember).filter(TeamMember.user_id == user_id).all()
 
       for membership in team_memberships:
@@ -74,33 +74,41 @@ class TeamRepository:
           team_name = membership.team_name
 
           # 計算團隊總人數（考慮權重）
-          total_weight = db.query(func.sum(User.weight)).join(TeamMember, TeamMember.user_id == User.id).filter(
+          T = db.query(func.sum(User.weight)).join(TeamMember, TeamMember.user_id == User.id).filter(
               TeamMember.team_id == team_id
           ).scalar() or 0.0
 
           # 計算新會員數量（考慮權重）
-          new_members_weight = db.query(func.sum(User.weight)).join(TeamMember, TeamMember.user_id == User.id).filter(
+          N = db.query(func.sum(User.weight)).join(TeamMember, TeamMember.user_id == User.id).filter(
               TeamMember.team_id == team_id,
               User.is_old_customer == False  # 新會員條件
           ).scalar() or 0.0
 
           # 計算團隊默契 S（同步程度）
-          checkins = db.query(Checkin).filter(Checkin.user_id == user_id).order_by(Checkin.timestamp).all()
-          if len(checkins) > 1:
-              first_checkin = checkins[0].timestamp
-              last_checkin = checkins[-1].timestamp
-              S = (last_checkin - first_checkin).total_seconds() / 3600
-          else:
-              S = 0  # 單一 Check-in 時默契為 0
+          # 找到該團隊所有成員的 last_update
+          member_updates = db.query(User.last_update, User.user_name).join(TeamMember, TeamMember.user_id == User.id).filter(
+              TeamMember.team_id == team_id
+          ).all()
 
+          # 打印每個成員的名字和更新時間
+          # for last_update, user_name in member_updates:
+          #     print(f"User: {user_name}, Last Update: {last_update}")
+
+          if len(member_updates) > 1:
+              # 提取最早和最晚的 last_update 和用戶名
+              earliest_update = min(member_updates, key=lambda x: x[0])
+              latest_update = max(member_updates, key=lambda x: x[0])
+              S = (latest_update[0] - earliest_update[0]).total_seconds() / 3600  # 時間差轉換為小時
+          else:
+              S = 0  # 單一成員時默契為 0
           # 設定 α 和 β 的參數
           alpha = 0.05
           beta = 3
 
           # 計算團隊分數
-          print(f"\n\n\n\n\nscore of team {team_name} is from Total: {total_weight:.2f}, "
-                f"New: {new_members_weight:.2f}, Sync: {S:.2f}.\n\n\n\n\n")
-          score = total_weight / (alpha * (S + 1)) + beta * new_members_weight
+          print(f"\n\n\n\n\nscore of team {team_name} is from T: {T:.2f}, "
+                f"N: {N:.2f}, S: {S:.2f}.\n\n\n\n\n")
+          score = T / (alpha * (S + 1)) + beta * N
 
           # 更新團隊分數表
           existing_score = db.query(Score).filter(Score.team_id == team_id).first()

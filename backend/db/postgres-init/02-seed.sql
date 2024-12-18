@@ -15,10 +15,10 @@ INSERT INTO team_members (user_id, team_id, user_name, team_name)
 VALUES 
   (1, 1, 'testuser', 'Team A'),
   (2, 2, 'testuser2', 'Team B');
-INSERT INTO checkins (user_id, user_name, content)
+INSERT INTO checkins (user_id, user_name, content, timestamp)
 VALUES 
-  (1, 'testuser', 'today 1205 is a good day'),
-  (2, 'testuser2', 'hi everyone');
+  (1, 'testuser', 'today 1202 is a good day', '2024-12-02'),
+  (2, 'testuser2', 'hi everyone I am testuser2', '2024-12-02');
 
 INSERT INTO scores (team_id, team_name, score)
 VALUES 
