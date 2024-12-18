@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import Security, APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.repositories.team_repository import TeamRepository
@@ -6,8 +6,11 @@ from app.schemas.team_schemas import CreateTeam, JoinTeam
 from app.models.user_model import User
 from app.models.team_model import Team, TeamMember, Score
 from app.core.security import verify_access_token
-from typing import List, Dict
+from typing import List, Dict, Optional
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
+# 定義 HTTPBearer 的依賴 給 leaderboard中jwt使用
+auth_scheme = HTTPBearer(auto_error=False)
 router = APIRouter()
 
 # 顯示所有團隊
@@ -57,7 +60,28 @@ def get_team_members(team_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Failed to fetch team members: {str(e)}")
 
 @router.get("/leaderboard/")
-def get_leaderboard(db: Session = Depends(get_db)):
+def get_leaderboard(
+    db: Session = Depends(get_db),
+    credentials: Optional[HTTPAuthorizationCredentials] = Security(auth_scheme)  # 可选 Token
+):
+    # 預設用戶未登入
+    user_team_ids = []
+
+    # 如果提供了 Token，验证并获取用户信息
+    if credentials:
+        try:
+            payload = verify_access_token(credentials)
+            user_name = payload["sub"]
+
+            # 找到該用戶所屬的所有隊伍 ID
+            user_team_ids = db.query(TeamMember.team_id).filter(
+                TeamMember.user_name == user_name
+            ).all()
+            user_team_ids = [team_id[0] for team_id in user_team_ids]  # 提取 ID 列表
+        except HTTPException:
+            pass  # 忽略 Token 错误，继续匿名逻辑
+
+    # 查询排行榜数据
     scores = (
         db.query(Team.id, Team.team_name, Score.score)
         .join(Score, Team.id == Score.team_id)
@@ -65,8 +89,14 @@ def get_leaderboard(db: Session = Depends(get_db)):
         .limit(20)
         .all()
     )
+    # 返回數據，對於未登入的用戶，所有隊伍的 is_user_team 為 False
     return [
-        {"team_id": team_id, "team_name": team_name, "score": score}
+        {
+            "team_id": team_id,
+            "team_name": team_name,
+            "score": score,
+            "is_user_team": team_id in user_team_ids  # 判斷是否為使用者的隊伍
+        }
         for team_id, team_name, score in scores
     ]
 
