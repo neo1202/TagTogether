@@ -109,8 +109,8 @@ def get_team_score_info(team_id: int, db: Session = Depends(get_db)) -> Dict:
 
     # 获取团队成员
     team_members = db.query(TeamMember).filter(TeamMember.team_id == team_id).all()
-    member_ids = [member.user_id for member in team_members]
-    
+    member_ids = [member.user_id for member in team_members]  # 這個隊伍有哪些user
+
     if not member_ids:
         return {
             "team_name": team.team_name,
@@ -119,17 +119,34 @@ def get_team_score_info(team_id: int, db: Session = Depends(get_db)) -> Dict:
             "earliest_checkin": None,
             "latest_checkin": None,
         }
-
     # 查询用户数据
-    users = db.query(User).filter(User.id.in_(member_ids)).all()
+    users = db.query(User).filter(User.id.in_(member_ids)).order_by(User.last_update).all()
+
+    if not users:
+        return {
+            "team_name": team.team_name,
+            "total_members": 0,
+            "new_members": 0,
+            "earliest_checkin": None,
+            "latest_checkin": None,
+        }
+
+    # 確保選擇不同用戶的邏輯
+    if len(users) == 1:
+        # 如果只有一個用戶
+        earliest_user = users[0]
+        latest_user = users[0]
+    else:
+        # 如果有多個用戶，選擇最早和最近的用戶
+        earliest_user = users[0]
+        latest_user = users[-1]
+        if earliest_user.id == latest_user.id:
+            # 如果最早和最近是同一用戶，選取次最近的
+            latest_user = users[-2] if len(users) > 1 else users[0]
 
     # 计算总人数（基于 weight）和新会员人数（基于 weight 和 is_old_customer）
     total_members_weight = sum(user.weight for user in users)
     new_members_weight = sum(user.weight for user in users if not user.is_old_customer)
-
-    # 查找最早和最晚打卡时间
-    earliest_user = min(users, key=lambda x: x.last_update)
-    latest_user = max(users, key=lambda x: x.last_update)
 
     return {
         "team_name": team.team_name,
