@@ -1,24 +1,21 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import dotenv from "dotenv";
+import { defineConfig, loadEnv } from 'vite';
+import react from '@vitejs/plugin-react';
 
-// Load environment variables from `.env` file
-dotenv.config();
+export default defineConfig(({ mode }) => {
+  // Load env file based on `mode` in the current working directory.
+  // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
+  const env = loadEnv(mode, process.cwd(), '');
 
-// Access the environment variable directly using `process.env`
-const backendUrl = process.env.VITE_BACKEND_URL;
-
-
-// https://vitejs.dev/config/
-export default defineConfig({
-  server: {
-    proxy: {
-      "/api": {
-        target: backendUrl,
-        changeOrigin: true,
-        secure: false,
+  return {
+    plugins: [react()],
+    server: {
+      proxy: {
+        "/api": {
+          target: env.VITE_BACKEND_URL,
+          changeOrigin: true,
+          secure: false,
+        },
       },
     },
-  },
-  plugins: [react()],
+  };
 });
