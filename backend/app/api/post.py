@@ -1,13 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from app.database import get_db
-from app.models.user_model import User, Checkin
-from app.core.security import verify_access_token
+from app.database import get_db_reader
+from app.models.user_model import Checkin
 
 router = APIRouter()
 
 @router.get("/posts/", response_model=list)
-def get_posts(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+def get_posts(skip: int = 0, limit: int = 10, db: Session = Depends(get_db_reader)):
     """
     获取按时间倒序排列的帖子流
     """

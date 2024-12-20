@@ -1,6 +1,6 @@
 from fastapi import Security, APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
-from app.database import get_db
+from app.database import get_db_writer, get_db_reader
 from app.repositories.team_repository import TeamRepository
 from app.schemas.team_schemas import CreateTeam, JoinTeam
 from app.models.user_model import User
@@ -15,13 +15,13 @@ router = APIRouter()
 
 # 顯示所有團隊
 @router.get("/all-teams/")
-def get_teams(db: Session = Depends(get_db)):
+def get_teams(db: Session = Depends(get_db_reader)):
     teams = TeamRepository.get_all_teams(db)
     return [{"id": team.id, "name": team.team_name} for team in teams]
 
 # 創建團隊
 @router.post("/create-team/")
-def create_team(team: CreateTeam, db: Session = Depends(get_db)):
+def create_team(team: CreateTeam, db: Session = Depends(get_db_writer)):
     # 檢查團隊名稱是否已存在
     existing_team = TeamRepository.get_team_by_name(db, team.team_name)
     if existing_team:
@@ -31,7 +31,7 @@ def create_team(team: CreateTeam, db: Session = Depends(get_db)):
 
 # 加入團隊傳入team_name, user name從jwt得到
 @router.post("/join-team/")
-def join_team(request: JoinTeam, db: Session = Depends(get_db), payload: dict = Depends(verify_access_token)):
+def join_team(request: JoinTeam, db: Session = Depends(get_db_writer), payload: dict = Depends(verify_access_token)):
     user_name = payload["sub"]
     # 检查团队是否存在
     team = TeamRepository.get_team_by_name(db, request.team_name)
@@ -52,7 +52,7 @@ def join_team(request: JoinTeam, db: Session = Depends(get_db), payload: dict = 
 
 # 获取团队成员列表
 @router.get("/team-members/{team_id}")
-def get_team_members(team_id: int, db: Session = Depends(get_db)):
+def get_team_members(team_id: int, db: Session = Depends(get_db_reader)):
     try:
         members = TeamRepository.get_team_members(db, team_id)
         return members
@@ -61,7 +61,7 @@ def get_team_members(team_id: int, db: Session = Depends(get_db)):
 
 @router.get("/leaderboard/")
 def get_leaderboard(
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_reader),
     credentials: Optional[HTTPAuthorizationCredentials] = Security(auth_scheme)  # 可选 Token
 ):
     # 預設用戶未登入
@@ -101,7 +101,7 @@ def get_leaderboard(
     ]
 
 @router.get("/score-info/{team_id}")
-def get_team_score_info(team_id: int, db: Session = Depends(get_db)) -> Dict:
+def get_team_score_info(team_id: int, db: Session = Depends(get_db_reader)) -> Dict:
     # 获取团队数据
     team = db.query(Team).filter(Team.id == team_id).first()
     if not team:

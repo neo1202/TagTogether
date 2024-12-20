@@ -1,7 +1,7 @@
 # 存放與用戶相關的路由，如獲取當前用戶資訊，上傳貼文
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from app.database import get_db
+from app.database import get_db_writer, get_db_reader
 from app.models.user_model import Checkin
 from app.core.security import verify_access_token
 from app.schemas.user_schemas import UploadPost
@@ -12,7 +12,7 @@ from app.repositories.team_repository import TeamRepository
 router = APIRouter()
 
 @router.get("/me")
-def get_my_user_name(payload: dict = Depends(verify_access_token)):
+def get_my_user_name(payload: dict = Depends(verify_access_token), db: Session = Depends(get_db_reader)):
     """
     获取当前用户的用户名。
     :param payload: 解码后的 JWT 令牌数据
@@ -26,7 +26,7 @@ def get_my_user_name(payload: dict = Depends(verify_access_token)):
 # }
 
 @router.post("/upload-post")
-def upload_post(content: UploadPost, db: Session = Depends(get_db), payload: dict = Depends(verify_access_token)):
+def upload_post(content: UploadPost, db: Session = Depends(get_db_writer), payload: dict = Depends(verify_access_token)):
     try:
         user_name = payload["sub"]
         user_id = UserRepository.get_user_id_by_username(db, user_name)

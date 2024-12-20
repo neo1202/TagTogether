@@ -1,14 +1,14 @@
 from fastapi import APIRouter, HTTPException, Depends
 from app.schemas.user_schemas import UserLogin, Token, UserRegister
 from app.core.security import create_access_token
-from app.database import get_db, get_user
+from app.database import get_db_reader, get_db_writer, get_user
 from sqlalchemy.orm import Session
 from app.models.user_model import User
 
 router = APIRouter()
 
 @router.post("/login", response_model=Token)  # 定义返回给客户端的数据模型是 Token
-def login(user: UserLogin, db: Session = Depends(get_db)):  # 注入数据库会话
+def login(user: UserLogin, db: Session = Depends(get_db_reader)):  # 注入数据库会话
     db_user = get_user(db, user.user_name)  # 使用 get_user 函数从数据库中获取用户
     print(f"/login, received username: {user.user_name}, pwd: {user.password}")
     
@@ -26,7 +26,7 @@ def login(user: UserLogin, db: Session = Depends(get_db)):  # 注入数据库会
 # 令牌生成: 如果验证通过，调用 create_access_token 生成 JWT 令牌，并返回给客户端。
 
 @router.post("/register")
-def signup(request: UserRegister, db: Session = Depends(get_db)):
+def signup(request: UserRegister, db: Session = Depends(get_db_writer)):
     # 檢查用戶是否已存在
     existing_user = db.query(User).filter(User.user_name == request.user_name).first()
     if existing_user:
